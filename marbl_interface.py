@@ -3,15 +3,14 @@
 from ctypes import *
 
 class marbl_interface_wrapper_class(object):
-  _fields_ = [("nt", c_int)]
 
   def __init__(self):
     self._MARBL = cdll.LoadLibrary("marbl_lib/marbl_interface.so")
-    self.nt = 0
 
-  def init(self): 
-    if (_init_marbl(self._MARBL, self.nt) == 0):
-      print "Initialized MARBL with %d tracers" % self.nt
+  def init(self):
+    nt = c_int(0)
+    if (_init_marbl(self._MARBL, byref(nt)) == 0):
+      print "Initialized MARBL with %d tracers" % nt.value
     else:
       print "Error initializing MARBL"
 
