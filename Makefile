@@ -6,6 +6,7 @@
 # Eventually this may be included as a subtree or submodule
 
 MARBL_LIB=marbl_lib/libmarbl.a
+SO_INTERFACE=marbl_lib/marbl_interface.so
 INTERFACE_SRC=marbl_interface_wrapper_mod.F90
 MEX_INTERFACE=$(INTERFACE_SRC:.F90=.mexa64)
 MEX_DRIVER_SRC=mex_marbl_driver.F90
@@ -28,6 +29,12 @@ $(MEX_DRIVER): $(MEX_INTERFACE) $(MEX_DRIVER_SRC)
 $(MEX_INTERFACE): $(MARBL_LIB) $(INTERFACE_SRC)
 	mex -Imarbl_include $(INTERFACE_SRC)
 
+$(SO_INTERFACE): $(MARBL_LIB) $(INTERFACE_SRC)
+	gfortran -Imarbl_include -Lmarbl_lib -lmarbl -shared -fPIC -o $(SO_INTERFACE) $(INTERFACE_SRC)
+
+# Short target for building the .so target
+libso: $(SO_INTERFACE)
+
 # The marbl library should be rebuilt if any of the MARBL fortran files change
 $(MARBL_LIB): $(wildcard marbl_src/*.F90)
 	cd marbl_include ; $(MAKE) -f ../marbl_src/Makefile FC=gfortran FCFLAGS="-fPIC" USE_DEPS=TRUE OBJ_DIR=. INC_DIR=. LIB_DIR=../marbl_lib ../$(MARBL_LIB) ; cd ..
@@ -40,7 +47,7 @@ lib: $(MARBL_LIB)
 # Clean up just the interface files with "$ make clean"
 .PHONY: clean
 clean:
-	rm -f *.mod *.mexa64 *.o
+	rm -f *.mod *.mexa64 *.o *.pyc
 
 # Or use "$ make allclean" to clean up the interface files and the MARBL library
 .PHONY: allclean

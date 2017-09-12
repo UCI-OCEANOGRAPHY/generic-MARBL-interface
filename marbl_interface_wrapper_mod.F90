@@ -62,6 +62,23 @@ contains
 
 ! =============================================================================
 
+  subroutine print_marbl_log()
+
+    use marbl_logging, only : marbl_status_log_entry_type
+
+    type(marbl_status_log_entry_type), pointer :: msg_ptr
+
+    ! Determine number of messages
+    msg_ptr => marbl_instance%StatusLog%FullLog
+    do while (associated(msg_ptr))
+      write(*,"(A)") trim(msg_ptr%LogMessage)
+      msg_ptr => msg_ptr%next
+    end do
+
+  end subroutine print_marbl_log
+
+! =============================================================================
+
   subroutine get_marbl_log(log_array, msg_cnt)
 
     use marbl_logging, only : marbl_status_log_entry_type
