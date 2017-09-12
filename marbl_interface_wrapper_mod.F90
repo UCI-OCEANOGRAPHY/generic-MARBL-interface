@@ -8,7 +8,11 @@ module marbl_interface_wrapper_mod
 
   type(marbl_interface_class) :: marbl_instance
 
+  private :: get_return_code
+
 contains
+
+! =============================================================================
 
   function init_marbl(nt)
 
@@ -41,12 +45,72 @@ contains
                              gcm_zw = zw,                          &
                              gcm_zt = zt,                          &
                              marbl_tracer_cnt = nt)
-    if (marbl_instance%StatusLog%labort_marbl) then
-      init_marbl = -1
-    else
-      init_marbl = 1
-    end if
+    init_marbl = get_return_code()
 
   end function init_marbl
+
+! =============================================================================
+
+  function shutdown_marbl()
+
+    integer :: shutdown_marbl
+
+    call marbl_instance%shutdown()
+    shutdown_marbl = get_return_code()
+
+  end function shutdown_marbl
+
+! =============================================================================
+
+  subroutine get_marbl_log(log_array, msg_cnt)
+
+    use marbl_logging, only : marbl_status_log_entry_type
+
+    character(len=*), allocatable, intent(out) :: log_array(:)
+    integer,                       intent(out) :: msg_cnt
+
+    type(marbl_status_log_entry_type), pointer :: msg_ptr
+
+    ! Determine number of messages
+    msg_cnt = 0
+    msg_ptr => marbl_instance%StatusLog%FullLog
+    do while (associated(msg_ptr))
+      msg_cnt = msg_cnt + 1
+      msg_ptr => msg_ptr%next
+    end do
+
+    ! Allocate memory for messages to return
+    allocate(log_array(msg_cnt+1))
+    log_array = ''
+
+    ! Copy messages to log_array
+    msg_cnt = 0
+    msg_ptr => marbl_instance%StatusLog%FullLog
+    do while (associated(msg_ptr))
+      msg_cnt = msg_cnt + 1
+      log_array(msg_cnt) = trim(msg_ptr%LogMessage)
+      msg_ptr => msg_ptr%next
+    end do
+
+    call marbl_instance%StatusLog%erase()
+    marbl_instance%StatusLog%labort_marbl = .false.
+
+  end subroutine get_marbl_log
+
+! =============================================================================
+
+  function get_return_code()
+
+    integer :: get_return_code
+
+    if (marbl_instance%StatusLog%labort_marbl) then
+      get_return_code = -1
+    else
+      get_return_code = 0
+    end if
+
+  end function get_return_code
+
+! =============================================================================
 
 end module marbl_interface_wrapper_mod

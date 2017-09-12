@@ -8,9 +8,15 @@
 MARBL_LIB=marbl_lib/libmarbl.a
 INTERFACE_SRC=marbl_interface_wrapper_mod.F90
 MEX_INTERFACE=$(INTERFACE_SRC:.F90=.mexa64)
+MEX_DRIVER_SRC=mex_marbl_driver.F90
+MEX_DRIVER=$(MEX_DRIVER_SRC:.F90=.mexa64)
 
-all: $(MEX_INTERFACE)
-$(MEX_INTERFACE): $(MARBL_LIB)
+all: $(MEX_DRIVER)
+
+$(MEX_DRIVER): $(MEX_INTERFACE) $(MEX_DRIVER_SRC)
+	mex -Imarbl_include $(MEX_DRIVER_SRC) $(INTERFACE_SRC) marbl_include/*.o
+
+$(MEX_INTERFACE): $(MARBL_LIB) $(INTERFACE_SRC)
 	mex -Imarbl_include $(INTERFACE_SRC)
 
 .PHONY: lib
