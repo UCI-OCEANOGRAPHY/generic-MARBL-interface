@@ -7,4 +7,5 @@ spmd(1)
 mex_marbl_driver('init')
 mex_marbl_driver('print log')
 mex_marbl_driver('shutdown')
+mex_marbl_driver('print timers')
 end

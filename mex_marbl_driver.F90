@@ -29,11 +29,11 @@ subroutine mexFunction(nlhs, plhs, nrhs, prhs)
   real*8  x_input, y_output, nt_r8
   character(len=80) marbl_phase
   character(len=160) message
-  integer status, init_result, nt, msg_cnt
+  integer status, init_result, nt, str_cnt
 
   ! Allocatable array for storing MARBL log
-  character(len=512), allocatable :: log_array(:)
-  integer :: log_ind
+  character(len=512), allocatable :: str_array(:)
+  integer :: str_ind
 
   if (nrhs .eq. 0) then
     call mexPrintf('Need to include phase argument!\n')
@@ -83,15 +83,27 @@ subroutine mexFunction(nlhs, plhs, nrhs, prhs)
         call mexPrintf('Mex-file note: error shutting down MARBL\n')
       end if
     case ('print log')
-      call get_marbl_log(log_array, msg_cnt)
-      if (allocated(log_array)) then
-        do log_ind = 1, msg_cnt+1
-          call mexPrintf(trim(log_array(log_ind)))
+      call get_marbl_log(str_array, str_cnt)
+      if (allocated(str_array)) then
+        do str_ind = 1, str_cnt+1
+          call mexPrintf(trim(str_array(str_ind)))
           call mexPrintf("\n")
         end do
-        deallocate(log_array)
+        deallocate(str_array)
       else
         call mexPrintf('Mex-file note: error retrieving MARBL log\n')
+      end if
+
+    case ('print timers')
+      call get_timer_summary(str_array, str_cnt)
+      if (allocated(str_array)) then
+        do str_ind = 1, str_cnt+5
+          call mexPrintf(trim(str_array(str_ind)))
+          call mexPrintf("\n")
+        end do
+        deallocate(str_array)
+      else
+        call mexPrintf('Mex-file note: error retrieving MARBL timers\n')
       end if
 
     case DEFAULT
