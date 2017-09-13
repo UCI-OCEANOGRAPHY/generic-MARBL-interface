@@ -5,7 +5,7 @@ from ctypes import *
 class marbl_interface_wrapper_class(object):
 
   def __init__(self):
-    self._MARBL = cdll.LoadLibrary("marbl_lib/marbl_interface.so")
+    self._MARBL = cdll.LoadLibrary("../../marbl_lib/marbl_interface.so")
 
   def init(self):
     nt = c_int(0)

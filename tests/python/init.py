@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+from sys import path
+
+path.insert(0,'../..')
 from marbl_interface import marbl_interface_wrapper_class
 
 marbl_instance = marbl_interface_wrapper_class()
