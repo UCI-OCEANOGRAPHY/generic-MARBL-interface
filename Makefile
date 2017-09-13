@@ -30,7 +30,7 @@ $(MEX_INTERFACE): $(MARBL_LIB) $(INTERFACE_SRC)
 	mex -Imarbl_include $(INTERFACE_SRC)
 
 $(SO_INTERFACE): $(MARBL_LIB) $(INTERFACE_SRC)
-	gfortran -Imarbl_include -Lmarbl_lib -lmarbl -shared -fPIC -o $(SO_INTERFACE) $(INTERFACE_SRC)
+	gfortran -Imarbl_include -Lmarbl_lib -shared -fPIC -o $(SO_INTERFACE) $(INTERFACE_SRC) -lmarbl
 
 # Short target for building the .so target
 libso: $(SO_INTERFACE)
@@ -47,10 +47,10 @@ lib: $(MARBL_LIB)
 # Clean up just the interface files with "$ make clean"
 .PHONY: clean
 clean:
-	rm -f *.mod *.mexa64 *.o *.pyc
+	rm -f *.mod *.mexa64 *.o *.pyc $(SO_INTERFACE)
 
 # Or use "$ make allclean" to clean up the interface files and the MARBL library
 .PHONY: allclean
 allclean: clean
-	rm -f marbl_include/*.mod marbl_include/*.o marbl_include/*.d marbl_lib/libmarbl.*
+	rm -f marbl_include/*.mod marbl_include/*.o marbl_include/*.d $(MARBL_LIB)
 
