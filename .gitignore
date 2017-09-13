@@ -1,4 +1,5 @@
 marbl_src
 *.mod
+*.o
 *.mexa64
 *.pyc

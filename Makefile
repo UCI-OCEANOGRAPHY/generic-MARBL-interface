@@ -8,6 +8,7 @@
 MARBL_LIB=marbl_lib/libmarbl.a
 SO_INTERFACE=marbl_lib/marbl_interface.so
 INTERFACE_SRC=marbl_interface_wrapper_mod.F90
+INTERFACE_OBJ=$(INTERFACE_SRC:.F90=.o)
 MEX_INTERFACE=$(INTERFACE_SRC:.F90=.mexa64)
 MEX_DRIVER_SRC=mex_marbl_driver.F90
 MEX_DRIVER=$(MEX_DRIVER_SRC:.F90=.mexa64)
@@ -17,12 +18,16 @@ MEX_DRIVER=$(MEX_DRIVER_SRC:.F90=.mexa64)
 #############
 
 # By default, build the mex driver included as an example
-all: $(MEX_DRIVER)
+all: mex
 
 # The mex driver should be rebuilt if the mex interface changes or if the
 # driver source code changes
 $(MEX_DRIVER): $(MEX_INTERFACE) $(MEX_DRIVER_SRC)
 	mex -Imarbl_include $(MEX_DRIVER_SRC) $(INTERFACE_SRC) marbl_include/*.o
+
+# Shortcut for building the mex driver: "$ make mex"
+.PHONY: mex
+mex: $(MEX_DRIVER)
 
 # The mex interface should be rebuilt if the MARBL library changes or if
 # the interface source code changes
@@ -30,7 +35,8 @@ $(MEX_INTERFACE): $(MARBL_LIB) $(INTERFACE_SRC)
 	mex -Imarbl_include $(INTERFACE_SRC)
 
 $(SO_INTERFACE): $(MARBL_LIB) $(INTERFACE_SRC)
-	gfortran -Imarbl_include -Lmarbl_lib -shared -fPIC -o $(SO_INTERFACE) $(INTERFACE_SRC) -lmarbl
+	gfortran -Imarbl_include -fPIC -c $(INTERFACE_SRC)
+	gfortran -Lmarbl_lib -shared -o $(SO_INTERFACE) $(INTERFACE_OBJ) -lmarbl
 
 # Short target for building the .so target
 libso: $(SO_INTERFACE)
