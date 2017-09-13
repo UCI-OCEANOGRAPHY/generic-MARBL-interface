@@ -1,11 +1,17 @@
 #!/usr/bin/env python
 
 from ctypes import *
+import os
 
 class marbl_interface_wrapper_class(object):
 
   def __init__(self):
-    self._MARBL = cdll.LoadLibrary("../../marbl_lib/marbl_interface.so")
+    # Want to load library from path relative to this file
+    libname = "marbl_lib/marbl_interface.so"
+    dirname = os.path.dirname(__file__)
+    if len(dirname) > 0:
+      libname = "%s/%s" % (dirname, libname)
+    self._MARBL = cdll.LoadLibrary(libname)
 
   def init(self):
     nt = c_int(0)
