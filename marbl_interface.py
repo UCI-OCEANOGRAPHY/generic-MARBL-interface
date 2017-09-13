@@ -14,7 +14,7 @@ class marbl_interface_wrapper_class(object):
     else:
       print "Error initializing MARBL"
 
-  def shutdown(self): 
+  def shutdown(self):
     if (_shutdown_marbl(self._MARBL) == 0):
       print "Successfully shutdown MARBL instance"
     else:
@@ -22,6 +22,9 @@ class marbl_interface_wrapper_class(object):
 
   def print_log(self):
     _print_log(self._MARBL)
+
+  def print_timer_summary(self):
+    _print_timer_summary(self._MARBL)
 
 def _init_marbl(libmarbl, nt):
   stat = libmarbl.__marbl_interface_wrapper_mod_MOD_init_marbl(nt)
@@ -33,3 +36,6 @@ def _shutdown_marbl(libmarbl):
 
 def _print_log(libmarbl):
   libmarbl.__marbl_interface_wrapper_mod_MOD_print_marbl_log()
+
+def _print_timer_summary(libmarbl):
+  libmarbl.__marbl_interface_wrapper_mod_MOD_print_timer_summary()

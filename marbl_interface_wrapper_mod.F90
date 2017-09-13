@@ -62,6 +62,7 @@ contains
 
 ! =============================================================================
 
+  ! Use this subroutine to print the log when you have access to stdout
   subroutine print_marbl_log()
 
     use marbl_logging, only : marbl_status_log_entry_type
@@ -79,6 +80,8 @@ contains
 
 ! =============================================================================
 
+  ! Use this subroutine to return the log to a fortran driver when you do not
+  ! have access to stdout
   subroutine get_marbl_log(log_array, msg_cnt)
 
     use marbl_logging, only : marbl_status_log_entry_type
@@ -113,6 +116,54 @@ contains
     marbl_instance%StatusLog%labort_marbl = .false.
 
   end subroutine get_marbl_log
+
+! =============================================================================
+
+  subroutine print_timer_summary()
+
+    integer :: n
+
+    ! Header block of text
+    write(*,"(A)") ''
+    write(*,"(A)") '-------------'
+    write(*,"(A)") 'Timer Summary'
+    write(*,"(A)") '-------------'
+    write(*,"(A)") ''
+
+    ! Get timers from instance
+    do n = 1, marbl_instance%timer_summary%num_timers
+      write(*,"(A, ': ', F11.3, ' seconds')") trim(marbl_instance%timer_summary%names(n)),        &
+                                              marbl_instance%timer_summary%cumulative_runtimes(n)
+    end do
+
+  end subroutine print_timer_summary
+
+! =============================================================================
+
+  subroutine get_timer_summary(timer_array, timer_cnt)
+
+    character(len=*), allocatable, intent(out) :: timer_array(:)
+    integer,                       intent(out) :: timer_cnt
+
+    integer :: n
+
+    timer_cnt = marbl_instance%timer_summary%num_timers
+    allocate(timer_array(timer_cnt+5))
+
+    ! Header block of text
+    write(timer_array(1),"(A)") ''
+    write(timer_array(2),"(A)") '-------------'
+    write(timer_array(3),"(A)") 'Timer Summary'
+    write(timer_array(4),"(A)") '-------------'
+    write(timer_array(5),"(A)") ''
+
+    ! Get timers from instance
+    do n = 1, timer_cnt
+      write(timer_array(n+5),"(A, ': ', F11.3, ' seconds')") trim(marbl_instance%timer_summary%names(n)),        &
+                                                             marbl_instance%timer_summary%cumulative_runtimes(n)
+    end do
+
+  end subroutine get_timer_summary
 
 ! =============================================================================
 
