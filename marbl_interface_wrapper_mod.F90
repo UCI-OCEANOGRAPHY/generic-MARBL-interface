@@ -119,6 +119,7 @@ contains
 
 ! =============================================================================
 
+  ! Use this subroutine to print the timer summary when you have access to stdout
   subroutine print_timer_summary()
 
     integer :: n
@@ -140,6 +141,8 @@ contains
 
 ! =============================================================================
 
+  ! Use this subroutine to return the log to a fortran driver when you do not
+  ! have access to stdout
   subroutine get_timer_summary(timer_array, timer_cnt)
 
     character(len=*), allocatable, intent(out) :: timer_array(:)
