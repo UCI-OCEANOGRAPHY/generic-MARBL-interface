@@ -28,7 +28,8 @@ subroutine mexFunction(nlhs, plhs, nrhs, prhs)
   ! Arguments for computational routine:
   real*8  x_input, y_output, nt_r8
   character(len=80) marbl_phase
-  character(len=160) message
+  character(len=320) put_call
+  character(len=640) message
   integer status, init_result, nt, str_cnt
 
   ! Allocatable array for storing MARBL log
@@ -43,6 +44,18 @@ subroutine mexFunction(nlhs, plhs, nrhs, prhs)
   size = 80
   status = mxGetString(prhs(1), marbl_phase, maxbuf)
   select case (trim(marbl_phase))
+    case ('put setting')
+      call mexPrintf('MEX-file note: calling put_setting()\n')
+      if (nrhs .eq. 1) then
+        call mexPrintf('Need to include a variable to put!\n')
+        return
+      end if
+      status = mxGetString(prhs(2), put_call, maxbuf)
+      write(message, "(3A)") '  Setting: ', trim(put_call), '\n'
+      call mexPrintf(trim(message))
+      status = put_setting(put_call)
+      if (status .ne. 0) &
+        call mexPrintf('Error calling put_setting()')
     case ('init')
       call mexPrintf('MEX-file note: calling init\n')
       ! Call the computational subroutine.

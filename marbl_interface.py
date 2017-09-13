@@ -26,6 +26,10 @@ class marbl_interface_wrapper_class(object):
   def print_timer_summary(self):
     _print_timer_summary(self._MARBL)
 
+  def put_setting(self, line_in):
+    if (_put_setting(self._MARBL, line_in) != 0):
+      print "Error calling put_setting"
+
 def _init_marbl(libmarbl, nt):
   stat = libmarbl.__marbl_interface_wrapper_mod_MOD_init_marbl(nt)
   return(stat)
@@ -39,3 +43,8 @@ def _print_log(libmarbl):
 
 def _print_timer_summary(libmarbl):
   libmarbl.__marbl_interface_wrapper_mod_MOD_print_timer_summary()
+
+def _put_setting(libmarbl, line_in):
+  line_len = c_int(len(line_in))
+  stat = libmarbl.__marbl_interface_wrapper_mod_MOD_put_setting_with_line_len(c_char_p(line_in), byref(line_len))
+  return(stat)

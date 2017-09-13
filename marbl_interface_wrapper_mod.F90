@@ -8,7 +8,14 @@ module marbl_interface_wrapper_mod
 
   type(marbl_interface_class) :: marbl_instance
 
+  interface put_setting
+    module procedure :: put_setting_without_line_len
+    module procedure :: put_setting_with_line_len
+  end interface put_setting
+
   private :: get_return_code
+  private :: put_setting_without_line_len
+  private :: put_setting_with_line_len
 
 contains
 
@@ -167,6 +174,31 @@ contains
     end do
 
   end subroutine get_timer_summary
+
+! =============================================================================
+
+  function put_setting_without_line_len(line_in) result(put_setting)
+
+    character(len=*), intent(in) :: line_in
+    integer :: put_setting
+
+    call marbl_instance%put_setting(line_in)
+    put_setting = get_return_code()
+
+  end function put_setting_without_line_len
+
+! =============================================================================
+
+  function put_setting_with_line_len(line_in, line_len) result(put_setting)
+
+    integer,                 intent(in) :: line_len
+    character(len=line_len), intent(in) :: line_in
+    integer :: put_setting
+
+    call marbl_instance%put_setting(line_in)
+    put_setting = get_return_code()
+
+  end function put_setting_with_line_len
 
 ! =============================================================================
 
