@@ -62,12 +62,28 @@ subroutine mexFunction(nlhs, plhs, nrhs, prhs)
       if (status .ne. 0) &
         call mexPrintf('Error calling put_setting()')
     case ('init')
-      ! pack marbl domain information into arrays
-      nlev = 5
+      ! Did user provide proper inputs?
+      if (nrhs .ne. 4) then
+        call MexPrintf("'init' requires 3 additional arguments: delta_z, zw, zt")
+        return
+      end if
+
+      ! pull arrays out of prhs
+      ! (for now we trust user to passing 1-d arrays with same size
+      nlev = mxGetM(prhs(2))
       allocate(delta_z(nlev), zt(nlev), zw(nlev))
-      delta_z = 1.
-      zw = (/1., 2., 3., 4., 5./)
-      zt = (/0.5, 1.5, 2.5, 3.5, 4.5/)
+
+      ! prhs(2) -> delta_z
+      x_ptr = mxGetPr(prhs(2))
+      call mxCopyPtrToReal8(x_ptr, delta_z, nlev)
+
+      ! prhs(3) -> zw
+      x_ptr = mxGetPr(prhs(3))
+      call mxCopyPtrToReal8(x_ptr, zw, nlev)
+
+      ! prhs(4) -> zt
+      x_ptr = mxGetPr(prhs(4))
+      call mxCopyPtrToReal8(x_ptr, zt, nlev)
 
       ! call init_marbl()
       call mexPrintf('MEX-file note: calling init\n')
