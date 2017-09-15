@@ -1,6 +1,7 @@
 module marbl_interface_wrapper_mod
 
   use marbl_interface, only : marbl_interface_class
+  use marbl_kinds_mod, only : char_len ! want this accessible to mex driver
 
   implicit none
   public

@@ -14,12 +14,24 @@ for n=2:nlev
   zt(n) = 0.5*(zw(n-1) + zw(n));
 end
 
-% need to wrap this in spmd(1) to prevent threading
-spmd(1)
+global marbl_log
 mex_marbl_driver('put setting', 'ciso_on = .true.')
-tracer_cnt = mex_marbl_driver('init', delta_z, zw, zt);
-mex_marbl_driver('print log')
+[marbl_log, tracer_cnt] = mex_marbl_driver('init', delta_z, zw, zt);
+print_log()
 mex_marbl_driver('shutdown')
-mex_marbl_driver('print timers')
+%mex_marbl_driver('print timers')
 tracer_cnt
-end
+
+function print_log()
+  global marbl_log
+  dims = size(marbl_log)
+  for n=1:dims(1)
+    if (size(strtrim(marbl_log(n,:))) == 0)
+      fprintf('\n')
+    else
+      fprintf('%s\n',strtrim(marbl_log(n,:)));
+    end % if
+  end % for
+  clear -global marbl_log
+end % function
+

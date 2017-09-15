@@ -12,10 +12,13 @@ subroutine mexFunction(nlhs, plhs, nrhs, prhs)
 
   ! Function declarations:
   integer*4 mxGetString
+  mwPointer mxCreateString
   mwPointer mxGetPr
   mwPointer mxCreateDoubleMatrix
   integer mxIsNumeric
   mwPointer mxGetM, mxGetN
+  mwPointer string_return(1)
+  integer mexCallMATLAB
 
   ! Pointers to input/output mxArrays:
   mwPointer x_ptr, y_ptr
@@ -25,12 +28,16 @@ subroutine mexFunction(nlhs, plhs, nrhs, prhs)
   mwSize size, maxbuf
   parameter(maxbuf=80)
 
+  ! Arguments for string array
+  integer, parameter :: max_log_entry_cnt = 600
+  integer, parameter :: max_str_len = max_log_entry_cnt*char_len
   ! Arguments for computational routine:
   real*8  x_input, y_output, nt_r8
   character(len=80) marbl_phase
-  character(len=320) put_call
-  character(len=640) message
-  integer status, init_result, nt, str_cnt
+  character(len=char_len) put_call
+  character(len=char_len) message
+  character(len=max_str_len) log_as_single_string
+  integer status, init_result, nt, str_cnt, n
 
   ! Allocatable array for storing MARBL domain information
   ! (layer thickness, interface depth, and layer center depth)
@@ -38,7 +45,7 @@ subroutine mexFunction(nlhs, plhs, nrhs, prhs)
   real*8, allocatable, dimension(:) :: delta_z, zw, zt
 
   ! Allocatable array for storing MARBL log
-  character(len=512), allocatable :: str_array(:)
+  character(len=char_len), allocatable :: str_array(:)
   integer :: str_ind
 
   if (nrhs .eq. 0) then
@@ -90,18 +97,52 @@ subroutine mexFunction(nlhs, plhs, nrhs, prhs)
       init_result = init_marbl(delta_z, zw, zt, nlev, nt)
       deallocate(delta_z, zw, zt)
 
-      ! Return tracer count (unless init_marbl returned an error)
+      ! Return tracer count and status log contents (unless init_marbl returned an error)
       if (init_result .eq. 0) then
-        ! Return tracer count
-        plhs(1) = mxCreateDoubleMatrix(1,1,0)
-        y_ptr = mxGetPr(plhs(1))
+        ! Return log (as a char_len x str_cnt array
+        call get_marbl_log(str_array, str_cnt)
+        if (str_cnt .gt. max_log_entry_cnt) then
+          write(message, "(A,I0,A,I0,A)") "Log has ", str_cnt, &
+                         " entries, which exceeds max  length. Returning first ", &
+                         max_log_entry_cnt, " entries."
+          str_cnt = max_log_entry_cnt
+        end if
+        log_as_single_string = ''
+        do n=1, str_cnt
+          write(log_as_single_string, "(2A)") log_as_single_string(:(n-1)*char_len), &
+                                              trim(str_array(n))
+        end do
+        string_return(1) = mxCreateString(log_as_single_string(1:char_len*str_cnt))
+        call mxSetM(string_return(1), char_len)
+        call mxSetN(string_return(1), str_cnt)
+        n = mexCallMATLAB(1, plhs, 1, string_return, 'transpose')
+        call mxDestroyArray(string_return(1))
+
+        ! Also return tracer count
+        plhs(2) = mxCreateDoubleMatrix(1,1,0)
+        y_ptr = mxGetPr(plhs(2))
         size = 1
         nt_r8 = nt
         call mxCopyReal8ToPtr(nt_r8,y_ptr,size)
+
       else
         call mexPrintf('MEX-file note: initialization failed!\n')
       end if
 #if 0
+    case ('print log')
+      call get_marbl_log(str_array, str_cnt)
+      if (allocated(str_array)) then
+        do str_ind = 1, str_cnt+1
+          write(message, "(I0,3A)") str_ind, ') ', trim(str_array(str_ind)), '\n'
+          call mexPrintf(trim(message))
+        end do
+        write(message, "(2A)") str_array(333), '\n'
+        call mexPrintf(trim(message))
+        deallocate(str_array)
+      else
+        call mexPrintf('Mex-file note: error retrieving MARBL log\n')
+      end if
+
     case ('surface')
       if (compute_marbl_surface_fluxes(y_output) .ne. 0) then
         call mexPrintf('Mex-file note: error computing surface fluxes\n')
@@ -126,18 +167,6 @@ subroutine mexFunction(nlhs, plhs, nrhs, prhs)
       if (shutdown_marbl() .ne. 0) then
         call mexPrintf('Mex-file note: error shutting down MARBL\n')
       end if
-    case ('print log')
-      call get_marbl_log(str_array, str_cnt)
-      if (allocated(str_array)) then
-        do str_ind = 1, str_cnt+1
-          call mexPrintf(trim(str_array(str_ind)))
-          call mexPrintf("\n")
-        end do
-        deallocate(str_array)
-      else
-        call mexPrintf('Mex-file note: error retrieving MARBL log\n')
-      end if
-
     case ('print timers')
       call get_timer_summary(str_array, str_cnt)
       if (allocated(str_array)) then
