@@ -1,5 +1,6 @@
 % To run, launch matlab from this directory and run
 % >> run('init.m')
+addpath('utils')
 addpath('../..')
 
 % set up simple column to pass to init
@@ -21,17 +22,4 @@ print_log()
 mex_marbl_driver('shutdown')
 %mex_marbl_driver('print timers')
 tracer_cnt
-
-function print_log()
-  global marbl_log
-  dims = size(marbl_log)
-  for n=1:dims(1)
-    if (size(strtrim(marbl_log(n,:))) == 0)
-      fprintf('\n')
-    else
-      fprintf('%s\n',strtrim(marbl_log(n,:)));
-    end % if
-  end % for
-  clear -global marbl_log
-end % function
 
