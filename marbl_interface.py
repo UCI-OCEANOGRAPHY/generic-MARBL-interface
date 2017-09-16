@@ -27,15 +27,13 @@ class marbl_interface_wrapper_class(object):
       print "Initialized MARBL with %d tracers" % nt
     else:
       print "Error initializing MARBL"
+    return _get_log(self._MARBL)
 
   def shutdown(self):
     if (_shutdown_marbl(self._MARBL) == 0):
       print "Successfully shutdown MARBL instance"
     else:
       print "Error shutting down MARBL"
-
-  def print_log(self):
-    _print_log(self._MARBL)
 
   def print_timer_summary(self):
     _print_timer_summary(self._MARBL)
@@ -73,8 +71,17 @@ def _shutdown_marbl(libmarbl):
 
 #####################################################################
 
-def _print_log(libmarbl):
-  libmarbl.__marbl_interface_wrapper_mod_MOD_print_marbl_log()
+def _get_log(libmarbl):
+  log_ptr = ((c_char_p*384)*600)()
+  c_cnt = c_int(0)
+  log = []
+  libmarbl.__marbl_interface_wrapper_mod_MOD_get_marbl_log2(byref(log_ptr), byref(c_cnt))
+  log_as_str = log_ptr[0][0]
+  for n in range(0,c_cnt.value):
+    first=n*384
+    last=(n+1)*384-1
+    log.append(log_as_str[first:last].strip())
+  return log
 
 #####################################################################
 
@@ -89,3 +96,7 @@ def _put_setting(libmarbl, line_in):
   return(stat)
 
 #####################################################################
+
+def print_log(log):
+  for entry in log:
+    print entry

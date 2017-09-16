@@ -113,27 +113,48 @@ contains
 
   end subroutine get_marbl_log
 
-! =============================================================================
+  ! =============================================================================
 
-  ! Use this subroutine to print the timer summary when you have access to stdout
-  subroutine print_timer_summary()
+  ! Use this subroutine to return the log to a fortran driver when you do not
+  ! have access to stdout
+  subroutine get_marbl_log2(log_ptr, msg_cnt)
 
-    integer :: n
+    use marbl_logging, only : marbl_status_log_entry_type
+    use iso_c_binding, only : c_ptr, c_loc
 
-    ! Header block of text
-    write(*,"(A)") ''
-    write(*,"(A)") '-------------'
-    write(*,"(A)") 'Timer Summary'
-    write(*,"(A)") '-------------'
-    write(*,"(A)") ''
+    type(c_ptr), intent(out) :: log_ptr
+    integer,     intent(out) :: msg_cnt
 
-    ! Get timers from instance
-    do n = 1, marbl_instance%timer_summary%num_timers
-      write(*,"(A, ': ', F11.3, ' seconds')") trim(marbl_instance%timer_summary%names(n)),        &
-                                              marbl_instance%timer_summary%cumulative_runtimes(n)
+    type(marbl_status_log_entry_type), pointer :: msg_ptr
+    character(len=char_len),           pointer :: log_array(:)
+
+    ! Determine number of messages
+    msg_cnt = 0
+    msg_ptr => marbl_instance%StatusLog%FullLog
+    do while (associated(msg_ptr))
+      msg_cnt = msg_cnt + 1
+      msg_ptr => msg_ptr%next
     end do
 
-  end subroutine print_timer_summary
+    ! Allocate memory for messages to return
+    allocate(log_array(msg_cnt+1))
+    log_array = ''
+
+    ! Copy messages to log_array
+    msg_cnt = 0
+    msg_ptr => marbl_instance%StatusLog%FullLog
+    do while (associated(msg_ptr))
+      msg_cnt = msg_cnt + 1
+      log_array(msg_cnt) = trim(msg_ptr%LogMessage)
+      msg_ptr => msg_ptr%next
+    end do
+
+    call marbl_instance%StatusLog%erase()
+    marbl_instance%StatusLog%labort_marbl = .false.
+
+    log_ptr = c_loc(log_array)
+
+  end subroutine get_marbl_log2
 
 ! =============================================================================
 

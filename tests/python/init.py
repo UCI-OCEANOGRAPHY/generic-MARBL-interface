@@ -10,7 +10,7 @@
 # Which requires adding ../../ to the python path
 from sys import path
 path.insert(0,'../..')
-from marbl_interface import marbl_interface_wrapper_class
+from marbl_interface import marbl_interface_wrapper_class, print_log
 
 # To initialize MARBL, we need to provide it with information about the ocean column we want to set up
 # The layer thicknesses, interface depths, and cell centers must be passed in
@@ -37,9 +37,9 @@ marbl_instance = marbl_interface_wrapper_class()
 
 # (2) Make any put statements / initialize the [Fortran] instance of marbl_interface_class
 marbl_instance.put_setting('ciso_on = .true.')
-marbl_instance.init(delta_z, zw, zt)
+marbl_log = marbl_instance.init(delta_z, zw, zt)
+print_log(marbl_log)
 
-# (3) Print the status log, shutdown MARBL, and print performance timer information
-marbl_instance.print_log()
+# shutdown MARBL
 marbl_instance.shutdown()
-marbl_instance.print_timer_summary()
+#marbl_instance.print_timer_summary()
