@@ -2,9 +2,11 @@
 # The mex target then uses these object files when building the marbl interface
 # for use with mex / Matlab
 #
-# Currently assumes that ./marbl_src is a soft-link to $MARBL/src
-# Eventually this may be included as a subtree or submodule
+# Assumes that MARBL is available in the directory marbl parallel to
+# marbl-interface/. If this is not the case, run
+# $ make MARBL_ROOT=[marbl directory]
 
+MARBL_ROOT=$(realpath ../marbl)
 MARBL_LIB=marbl_lib/libmarbl.a
 SO_INTERFACE=marbl_lib/marbl_interface.so
 INTERFACE_SRC=marbl_interface_wrapper_mod.F90
@@ -42,8 +44,8 @@ $(SO_INTERFACE): $(MARBL_LIB) $(INTERFACE_SRC)
 libso: $(SO_INTERFACE)
 
 # The marbl library should be rebuilt if any of the MARBL fortran files change
-$(MARBL_LIB): $(wildcard marbl_src/*.F90)
-	cd marbl_include ; $(MAKE) -f ../marbl_src/Makefile FC=gfortran FCFLAGS="-fPIC" USE_DEPS=TRUE OBJ_DIR=. INC_DIR=. LIB_DIR=../marbl_lib ../$(MARBL_LIB) ; cd ..
+$(MARBL_LIB): $(wildcard $(MARBL_ROOT)/src/*.F90)
+	cd marbl_include ; $(MAKE) -f $(MARBL_ROOT)/src/Makefile FC=gfortran FCFLAGS="-fPIC" USE_DEPS=TRUE OBJ_DIR=. INC_DIR=. LIB_DIR=../marbl_lib ../$(MARBL_LIB) ; cd ..
 
 # Here's an easy way to build just the MARBL library: "$ make lib"
 # (Instead of "$ make marbl_lib/libmarbl.a")
