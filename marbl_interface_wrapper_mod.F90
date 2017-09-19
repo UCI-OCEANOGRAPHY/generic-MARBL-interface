@@ -152,7 +152,7 @@ contains
     call marbl_instance%StatusLog%erase()
     marbl_instance%StatusLog%labort_marbl = .false.
 
-    log_ptr = c_loc(log_array)
+    log_ptr = c_loc(log_array(1))
 
   end subroutine get_marbl_log2
 
