@@ -78,46 +78,7 @@ contains
 
   ! Use this subroutine to return the log to a fortran driver when you do not
   ! have access to stdout
-  subroutine get_marbl_log(log_array, msg_cnt)
-
-    use marbl_logging, only : marbl_status_log_entry_type
-
-    character(len=*), allocatable, intent(out) :: log_array(:)
-    integer,                       intent(out) :: msg_cnt
-
-    type(marbl_status_log_entry_type), pointer :: msg_ptr
-
-    ! Determine number of messages
-    msg_cnt = 0
-    msg_ptr => marbl_instance%StatusLog%FullLog
-    do while (associated(msg_ptr))
-      msg_cnt = msg_cnt + 1
-      msg_ptr => msg_ptr%next
-    end do
-
-    ! Allocate memory for messages to return
-    allocate(log_array(msg_cnt+1))
-    log_array = ''
-
-    ! Copy messages to log_array
-    msg_cnt = 0
-    msg_ptr => marbl_instance%StatusLog%FullLog
-    do while (associated(msg_ptr))
-      msg_cnt = msg_cnt + 1
-      log_array(msg_cnt) = trim(msg_ptr%LogMessage)
-      msg_ptr => msg_ptr%next
-    end do
-
-    call marbl_instance%StatusLog%erase()
-    marbl_instance%StatusLog%labort_marbl = .false.
-
-  end subroutine get_marbl_log
-
-  ! =============================================================================
-
-  ! Use this subroutine to return the log to a fortran driver when you do not
-  ! have access to stdout
-  subroutine get_marbl_log2(log_ptr, msg_cnt)
+  subroutine get_marbl_log(log_ptr, msg_cnt)
 
     use marbl_logging, only : marbl_status_log_entry_type
     use iso_c_binding, only : c_ptr, c_loc
@@ -137,8 +98,8 @@ contains
     end do
 
     ! Allocate memory for messages to return
-    allocate(log_array(msg_cnt+1))
-    log_array = ''
+    allocate(log_array(msg_cnt))
+    log_array(:) = ''
 
     ! Copy messages to log_array
     msg_cnt = 0
@@ -154,7 +115,7 @@ contains
 
     log_ptr = c_loc(log_array(1))
 
-  end subroutine get_marbl_log2
+  end subroutine get_marbl_log
 
 ! =============================================================================
 
@@ -162,8 +123,8 @@ contains
   ! have access to stdout
   subroutine get_timer_summary(timer_array, timer_cnt)
 
-    character(len=*), allocatable, intent(out) :: timer_array(:)
-    integer,                       intent(out) :: timer_cnt
+    character(len=*), pointer, intent(out) :: timer_array(:)
+    integer,                   intent(out) :: timer_cnt
 
     integer :: n
 

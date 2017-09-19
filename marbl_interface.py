@@ -75,7 +75,7 @@ def _get_log(libmarbl):
   log_ptr = ((c_char_p*384)*600)()
   c_cnt = c_int(0)
   log = []
-  libmarbl.__marbl_interface_wrapper_mod_MOD_get_marbl_log2(byref(log_ptr), byref(c_cnt))
+  libmarbl.__marbl_interface_wrapper_mod_MOD_get_marbl_log(byref(log_ptr), byref(c_cnt))
   log_as_str = log_ptr[0][0]
   for n in range(0,c_cnt.value):
     first=n*384
