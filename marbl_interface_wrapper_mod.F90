@@ -58,24 +58,6 @@ contains
 
 ! =============================================================================
 
-  ! Use this subroutine to print the log when you have access to stdout
-  subroutine print_marbl_log()
-
-    use marbl_logging, only : marbl_status_log_entry_type
-
-    type(marbl_status_log_entry_type), pointer :: msg_ptr
-
-    ! Determine number of messages
-    msg_ptr => marbl_instance%StatusLog%FullLog
-    do while (associated(msg_ptr))
-      write(*,"(A)") trim(msg_ptr%LogMessage)
-      msg_ptr => msg_ptr%next
-    end do
-
-  end subroutine print_marbl_log
-
-! =============================================================================
-
   ! Use this subroutine to return the log to a fortran driver when you do not
   ! have access to stdout
   subroutine get_marbl_log(log_ptr, msg_cnt)
