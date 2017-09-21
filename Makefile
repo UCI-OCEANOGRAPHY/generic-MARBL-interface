@@ -6,7 +6,8 @@
 # marbl-interface/. If this is not the case, run
 # $ make MARBL_ROOT=[marbl directory]
 
-MARBL_ROOT=$(realpath ../marbl)
+MARBL_ROOT=../marbl
+MARBL_ROOT_FULL=$(realpath $(MARBL_ROOT))
 MARBL_LIB=marbl_lib/libmarbl.a
 SO_INTERFACE=marbl_lib/marbl_interface.so
 INTERFACE_SRC=marbl_interface_wrapper_mod.F90
@@ -44,8 +45,8 @@ $(SO_INTERFACE): $(MARBL_LIB) $(INTERFACE_SRC)
 libso: $(SO_INTERFACE)
 
 # The marbl library should be rebuilt if any of the MARBL fortran files change
-$(MARBL_LIB): $(wildcard $(MARBL_ROOT)/src/*.F90)
-	cd marbl_include ; $(MAKE) -f $(MARBL_ROOT)/src/Makefile FC=gfortran FCFLAGS="-fPIC" USE_DEPS=TRUE OBJ_DIR=. INC_DIR=. LIB_DIR=../marbl_lib ../$(MARBL_LIB) ; cd ..
+$(MARBL_LIB): $(wildcard $(MARBL_ROOT_FULL)/src/*.F90)
+	cd marbl_include ; $(MAKE) -f $(MARBL_ROOT_FULL)/src/Makefile FC=gfortran FCFLAGS="-fPIC" USE_DEPS=TRUE OBJ_DIR=. INC_DIR=. LIB_DIR=../marbl_lib ../$(MARBL_LIB) ; cd ..
 
 # Here's an easy way to build just the MARBL library: "$ make lib"
 # (Instead of "$ make marbl_lib/libmarbl.a")
